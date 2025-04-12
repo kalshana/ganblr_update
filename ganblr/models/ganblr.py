@@ -124,7 +124,7 @@ class GANBLR:
         y_test = self._label_encoder.transform(y)
 
         categories = self._d.get_categories()
-        pipline = Pipeline([('encoder', OneHotEncoder(categories=categories, handle_unknown='ignore')), ('model',  eval_model)]) 
+        pipline = Pipeline([('encoder', OneHotEncoder(categories=categories, handle_unknown='ignore', sparse_output=False)), ('model',  eval_model)])
         pipline.fit(synthetic_x, synthetic_y)
         pred = pipline.predict(x_test)
         return accuracy_score(y_test, pred)
