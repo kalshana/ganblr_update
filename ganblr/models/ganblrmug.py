@@ -1,6 +1,6 @@
 from ..kdb import *
 from ..utils import *
-from pgmpy.models import BayesianNetwork
+from pgmpy.models import DiscreteBayesianNetwork as BayesianNetwork
 from pgmpy.sampling import BayesianModelSampling
 from pgmpy.factors.discrete import TabularCPD
 from sklearn.preprocessing import OrdinalEncoder, LabelEncoder
