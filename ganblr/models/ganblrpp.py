@@ -287,7 +287,7 @@ class GANBLRPP:
         synthetic_data = self.sample()
         synthetic_x, synthetic_y = synthetic_data[:,:-1], synthetic_data[:,-1]
         
-        ohe = OneHotEncoder(categories=categories, sparse=False, handle_unknown='ignore')
+        ohe = OneHotEncoder(categories=categories, sparse_output=False, handle_unknown='ignore')
         syn_x_ohe  = ohe.fit_transform(synthetic_x[:,catgorical_columns])
         real_x_ohe = ohe.transform(x[:,catgorical_columns])
         syn_x_num  = synthetic_x[:,numerical_columns]

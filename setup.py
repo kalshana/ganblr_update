@@ -27,7 +27,7 @@ setup(
         "numpy>=1.20", 
         "pandas>=1.3", 
         "tensorflow>=2.3", 
-        "scikit-learn>=0.24", 
+        "scikit-learn>=1.2", 
         "pyitlib", 
         "pgmpy>=0.1.19"
     ],
