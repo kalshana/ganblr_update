@@ -1,4 +1,3 @@
-from tensorflow.python.ops import math_ops
 import numpy as np
 import tensorflow as tf
 
@@ -7,9 +6,9 @@ class softmax_weight(tf.keras.constraints.Constraint):
   
     def __init__(self,feature_uniques):
         if isinstance(feature_uniques, np.ndarray):
-            idxs = math_ops.cumsum(np.hstack([np.array([0]),feature_uniques]))
+            idxs = tf.math.cumsum(np.hstack([np.array([0]),feature_uniques]))
         else:
-            idxs = math_ops.cumsum([0] + feature_uniques)
+            idxs = tf.math.cumsum([0] + feature_uniques)
         idxs = [i.numpy() for i in idxs]
         self.feature_idxs = [
             (idxs[i],idxs[i+1]) for i in range(len(idxs)-1)
