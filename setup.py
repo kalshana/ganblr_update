@@ -28,7 +28,7 @@ setup(
         "pandas>=1.3", 
         "tensorflow>=2.3", 
         "scikit-learn>=1.2", 
-        "pyitlib", 
+        "pyitlib @ git+https://github.com/pinae/pyitlib.git", 
         "pgmpy>=0.1.19"
     ],
     classifiers=[
