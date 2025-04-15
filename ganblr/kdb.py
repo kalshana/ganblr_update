@@ -1,53 +1,65 @@
 import numpy as np
-#import networkx as nx
-from pyitlib import discrete_random_variable as drv
+from sklearn.metrics import mutual_info_score
+from sklearn.preprocessing import LabelEncoder
 
+# ------------------ REPLACEMENTS FOR pyitlib ------------------
+# Replaces drv.information_mutual(x, y)
+def mutual_information(x, y):
+    x = LabelEncoder().fit_transform(x)
+    y = LabelEncoder().fit_transform(y)
+    return mutual_info_score(x, y)
+
+# Replaces drv.information_mutual_conditional(x, y | z)
+def conditional_mutual_information(x, y, z):
+    x = LabelEncoder().fit_transform(x)
+    y = LabelEncoder().fit_transform(y)
+    z = LabelEncoder().fit_transform(z)
+    mi = 0.0
+    for val in np.unique(z):
+        idx = (z == val)
+        if np.sum(idx) > 1:
+            mi += mutual_info_score(x[idx], y[idx]) * (np.sum(idx) / len(z))
+    return mi
+
+# ------------------ KDB FUNCTIONS ------------------
 def build_graph(X, y, k=2):
-  '''
-  kDB algorithm
+    '''
+    kDB algorithm
+    Return:
+    graph edges
+    '''
+    num_features = X.shape[1]
+    x_nodes = list(range(num_features))
+    y_node  = num_features
 
-  Param:
-  ----------------------
-    
-  Return:
-  ----------------------
-  graph edges
-  '''
-  #ensure data
-  num_features = X.shape[1]
-  x_nodes = list(range(num_features))
-  y_node  = num_features
+    _x = lambda i:X[:,i]
+    _x2comb = lambda i,j:(X[:,i], X[:,j])
 
-  #util func
-  _x = lambda i:X[:,i]
-  _x2comb = lambda i,j:(X[:,i], X[:,j])
+    # Sort features by mutual information with label
+    sorted_feature_idxs = np.argsort([
+        mutual_information(_x(i), y) 
+        for i in range(num_features)
+    ])[::-1]
 
-  #feature indexes desc sort by mutual information
-  sorted_feature_idxs = np.argsort([
-    drv.information_mutual(_x(i), y) 
-    for i in range(num_features)
-  ])[::-1]
+    edges = []
+    for iter, target_idx in enumerate(sorted_feature_idxs):
+        target_node = x_nodes[target_idx]
+        edges.append((y_node, target_node))
 
-  #start building graph
-  edges = []
-  for iter, target_idx in enumerate(sorted_feature_idxs):
-    target_node = x_nodes[target_idx]
-    edges.append((y_node, target_node))
+        parent_candidate_idxs = sorted_feature_idxs[:iter]
+        if iter <= k:
+            for idx in parent_candidate_idxs:
+                edges.append((x_nodes[idx], target_node))
+        else:
+            first_k_parent_mi_idxs = np.argsort([
+                conditional_mutual_information(*_x2comb(i, target_idx), y)
+                for i in parent_candidate_idxs
+            ])[::-1][:k]
+            first_k_parent_idxs = parent_candidate_idxs[first_k_parent_mi_idxs]
 
-    parent_candidate_idxs = sorted_feature_idxs[:iter]
-    if iter <= k:
-      for idx in parent_candidate_idxs:
-        edges.append((x_nodes[idx], target_node))
-    else:
-      first_k_parent_mi_idxs = np.argsort([
-        drv.information_mutual_conditional(*_x2comb(i, target_idx), y)
-        for i in parent_candidate_idxs
-      ])[::-1][:k]
-      first_k_parent_idxs = parent_candidate_idxs[first_k_parent_mi_idxs]
-
-      for parent_idx in first_k_parent_idxs:
-        edges.append((x_nodes[parent_idx], target_node))
-  return edges
+            for parent_idx in first_k_parent_idxs:
+                edges.append((x_nodes[parent_idx], target_node))
+    return edges
 
 # def draw_graph(edges):
 #   '''
