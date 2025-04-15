@@ -16,7 +16,7 @@ class softmax_weight(tf.keras.constraints.Constraint):
   
     def __call__(self, w):     
         w_new = [
-            math_ops.log(tf.nn.softmax(w[i:j,:], axis=0))
+            tf.math.log(tf.nn.softmax(w[i:j,:], axis=0))
             for i,j in self.feature_idxs
         ]
         return tf.concat(w_new, 0)
