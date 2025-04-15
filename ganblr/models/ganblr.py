@@ -68,12 +68,18 @@ class GANBLR:
         syn_data = self._sample(verbose=0)
         discriminator_label = np.hstack([np.ones(d.data_size), np.zeros(d.data_size)])
         for i in range(epochs):
-            discriminator_input = np.vstack([x, syn_data[:,:-1]])
+            discriminator_input = np.vstack([x, syn_data[:, :-1]])
             disc_input, disc_label = sample(discriminator_input, discriminator_label, frac=0.8)
             disc = self._discrim()
             d_history = disc.fit(disc_input, disc_label, batch_size=batch_size, epochs=1, verbose=0).history
+
             prob_fake = disc.predict(x, verbose=0)
-            ls = np.mean(-np.log(np.subtract(1, prob_fake)))
+
+            # ✅ Fix: Prevent log(0) using epsilon
+            epsilon = 1e-10
+            safe_prob_fake = np.clip(1 - prob_fake, epsilon, 1)
+            ls = np.mean(-np.log(safe_prob_fake))
+
             g_history = self._run_generator(loss=ls).history
             syn_data = self._sample(verbose=0)
             
