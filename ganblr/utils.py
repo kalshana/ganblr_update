@@ -32,12 +32,13 @@ def elr_loss(KL_LOSS):
 def KL_loss(prob_fake):
     return np.mean(-np.log(np.subtract(1,prob_fake)))
 
-def get_lr(input_dim, output_dim, constraint=None,KL_LOSS=0):
-    model = tf.keras.Sequential()
-    model.add(tf.keras.layers.Dense(output_dim, input_dim=input_dim, activation='softmax',kernel_constraint=constraint))
+def get_lr(input_dim, output_dim, constraint=None, KL_LOSS=0):
+    model = tf.keras.Sequential([
+        tf.keras.Input(shape=(input_dim,)),
+        tf.keras.layers.Dense(output_dim, activation='softmax', kernel_constraint=constraint)
+    ])
     model.compile(loss=elr_loss(KL_LOSS), optimizer='adam', metrics=['accuracy'])
-    #log_elr = model.fit(*train_data, validation_data=test_data, batch_size=batch_size,epochs=epochs)
-    return model 
+    return model
 
 def sample(*arrays, n=None, frac=None, random_state=None):
     '''
