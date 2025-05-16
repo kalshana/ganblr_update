@@ -234,8 +234,10 @@ class GANBLR:
         d = self._d
         ohex = d.get_kdbe_x(self.k)
         tf.keras.backend.clear_session()
-        model = tf.keras.Sequential()
-        model.add(tf.keras.layers.Dense(d.num_classes, input_dim=ohex.shape[1], activation='softmax',kernel_constraint=self.constraints))
+        model = tf.keras.Sequential([
+    tf.keras.Input(shape=(ohex.shape[1],)),
+    tf.keras.layers.Dense(d.num_classes, activation='softmax', kernel_constraint=self.constraints)
+])
         model.compile(loss=elr_loss(loss), optimizer='adam', metrics=['accuracy'])
         model.set_weights(self.__gen_weights)
         history = model.fit(ohex, d.y, batch_size=self.batch_size,epochs=1, verbose=0)
@@ -244,7 +246,9 @@ class GANBLR:
         return history
     
     def _discrim(self):
-        model = tf.keras.Sequential()
-        model.add(tf.keras.layers.Dense(1, input_dim=self._d.num_features, activation='sigmoid'))
+        model = tf.keras.Sequential([
+    tf.keras.Input(shape=(self._d.num_features,)),
+    tf.keras.layers.Dense(1, activation='sigmoid')
+])
         model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
         return model
